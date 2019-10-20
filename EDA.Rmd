@@ -1,0 +1,67 @@
+---
+title: "CDC Injury Code Mining - EDA"
+author: "dan addyson"
+date: "10/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+.libs <- c("ggplot2","data.table")
+lapply(.libs, require, character.only = TRUE)
+rm(.libs)
+knitr::opts_chunk$set(echo = TRUE)
+options(theme=theme_bw())
+```
+
+## Reading Data
+
+Training data are read from the website. There are 3 input / feature columns & one dependent / response column.
+Adding in label names for clarity. Although not strictly necessary for modeling, certainly it's helpful for sense-making.
+```{r read merge data, echo=FALSE}
+trn <- setDT(read.csv("https://www.dropbox.com/s/wqjr5zcx1tl2shq/train.csv?dl=1"))
+cd_map <- setDT(read.csv("https://wwwn.cdc.gov/Wisards/oiics/Doc/OIICS%20Code%20List%20v201.csv"))
+
+dat <- merge(trn, cd_map[CASE_CODE_TYPE=="Event",list(CASE_CODE, CASE_CODE_TITLE)], by.x = "event", by.y = "CASE_CODE", all.x=TRUE)
+
+bound <- floor(round(nrow(dat) * .7 ))         #define % of training and test set
+dat2 <- dat[sample(nrow(dat)), ]           #sample rows 
+dat.train <- dat2[1:bound, ]              #get training set
+dat.test <- dat2[(bound+1):nrow(dat2), ]    #get test set
+dat.train$trn_tst <- "train"
+dat.test$trn_tst <- "test"
+
+dat <- rbind(dat.test, dat.train)
+dat[,sex:=ifelse(sex==2,"F","M")]
+dat[,CASE_CODE_TITLE2:=ifelse(is.na(CASE_CODE_TITLE),"unknown",CASE_CODE_TITLE)] # Label unknown / other events
+
+write.csv(x = dat, file = "train_labeled_split.csv")
+write.csv(x = cd_map, file = "code_label_map.csv")
+rm(cd_map)
+rm(dat.train)
+rm(dat.test)
+rm(dat2)
+rm(bound)
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r plot label count, echo=FALSE, fig.height=10}
+case_cnt <- dat[,.N,list(CASE_CODE_TITLE, trn_tst)]
+
+write.csv(case_cnt, file="outcome counts.csv")
+dat <- within(dat, 
+                   CASE_CODE_TITLE <- factor(CASE_CODE_TITLE, 
+                                      levels=names(sort(table(CASE_CODE_TITLE), 
+                                                        decreasing=FALSE))))
+
+ggplot(data=dat, aes(x=CASE_CODE_TITLE)) + geom_bar(stat="count") + geom_bar(aes(fill=trn_tst), position="dodge", stat="count")+
+  theme(axis.text = element_text(size = 30)) + 
+  labs(x = "Count of records", y = "Injury Category") + 
+  coord_flip()
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -1,0 +1,93 @@
+"","CASE_CODE_TITLE","trn_tst","N"
+"1","Other exertions or bodily reactions","test",2478
+"2","Struck by object or equipment","test",7408
+"3","Exposure to other harmful substances","test",3572
+"4","Overexertion involving outside sources","test",7728
+"5","Falls on same level ","test",4745
+"6","Falls to lower level","test",1948
+"7","Roadway incidents involving motorized land vehicle","test",781
+"8","Contact with objects and equipment, unspecified","test",2648
+"9","Intentional injury by person","test",2626
+"10","Struck against object or equipment","test",2708
+"11","Rubbed or abraded by friction or pressure","test",842
+"12","Overexertion and bodily reaction, unspecified","test",1626
+"13","Exposure to temperature extremes","test",1172
+"14","Caught in or compressed by equipment or objects","test",1327
+"15",NA,"test",389
+"16","Injury by person--unintentional or intent unknown","test",703
+"17","Exposure to electricity","test",152
+"18","Fires","test",257
+"19","Animal and insect related incidents ","test",972
+"20","Water vehicle incidents","test",24
+"21","Exposure to radiation and noise","test",140
+"22","Jumps to lower level","test",116
+"23","Repetitive motions involving microtasks","test",237
+"24","Nonroadway incidents involving motorized land vehicles ","test",249
+"25","Multiple types of overexertions and bodily reactions","test",263
+"26","Slip or trip without fall","test",452
+"27","Fall, slip, trip, unspecified ","test",23
+"28","Explosions","test",94
+"29","Pedestrian vehicular incidents","test",278
+"30","Struck, caught, or crushed in collapsing structure, equipment, or material","test",19
+"31","Fall or jump curtailed by personal fall arrest system ","test",5
+"32","Exposure to harmful substances or environments, unspecified","test",11
+"33","Animal and other non-motorized vehicle transportation incidents","test",94
+"34","Contact with objects and equipment, n.e.c.","test",21
+"35","Rubbed, abraded, or jarred by vibration","test",13
+"36","Rail vehicle incidents","test",16
+"37","Aircraft incidents","test",8
+"38","Needlestick without exposure to harmful substance","test",20
+"39","Transportation incident, unspecified","test",5
+"40","Overexertion and bodily reaction and exertion, n.e.c.","test",2
+"41","Fall, slip, trip, n.e.c.","test",8
+"42","Exposure to oxygen deficiency, n.e.c.","test",1
+"43","Bodily conditions, n.e.c.","test",2
+"44","Exposure to air and water pressure change","test",4
+"45","Overexertion involving outside sources","train",18182
+"46","Falls on same level ","train",10879
+"47","Injury by person--unintentional or intent unknown","train",1533
+"48","Roadway incidents involving motorized land vehicle","train",1910
+"49","Struck by object or equipment","train",16994
+"50","Falls to lower level","train",4601
+"51","Exposure to other harmful substances","train",8100
+"52","Other exertions or bodily reactions","train",5836
+"53","Slip or trip without fall","train",1060
+"54","Rubbed or abraded by friction or pressure","train",2031
+"55","Exposure to temperature extremes","train",2725
+"56","Struck against object or equipment","train",6350
+"57","Intentional injury by person","train",6309
+"58","Animal and insect related incidents ","train",2284
+"59","Overexertion and bodily reaction, unspecified","train",3689
+"60",NA,"train",984
+"61","Repetitive motions involving microtasks","train",527
+"62","Contact with objects and equipment, unspecified","train",6334
+"63","Nonroadway incidents involving motorized land vehicles ","train",595
+"64","Caught in or compressed by equipment or objects","train",3054
+"65","Explosions","train",236
+"66","Fires","train",645
+"67","Animal and other non-motorized vehicle transportation incidents","train",189
+"68","Pedestrian vehicular incidents","train",738
+"69","Contact with objects and equipment, n.e.c.","train",75
+"70","Multiple types of overexertions and bodily reactions","train",625
+"71","Water vehicle incidents","train",73
+"72","Exposure to radiation and noise","train",334
+"73","Aircraft incidents","train",28
+"74","Jumps to lower level","train",256
+"75","Exposure to electricity","train",344
+"76","Rail vehicle incidents","train",34
+"77","Fall, slip, trip, n.e.c.","train",18
+"78","Rubbed, abraded, or jarred by vibration","train",47
+"79","Exposure to harmful substances or environments, unspecified","train",15
+"80","Needlestick without exposure to harmful substance","train",32
+"81","Fall, slip, trip, unspecified ","train",27
+"82","Struck, caught, or crushed in collapsing structure, equipment, or material","train",29
+"83","Transportation incident, unspecified","train",7
+"84","Fall or jump curtailed by personal fall arrest system ","train",9
+"85","Overexertion and bodily reaction and exertion, n.e.c.","train",10
+"86","Bodily conditions, n.e.c.","train",2
+"87","Exposure to harmful substances or environments, n.e.c.","train",4
+"88","Transportation incident, n.e.c.","train",1
+"89","Exposure to air and water pressure change","train",6
+"90","Violence and other injuries by persons or animals, unspecified","train",2
+"91","Fire or explosion, unspecified ","train",1
+"92","Exposure to oxygen deficiency, n.e.c.","train",5
