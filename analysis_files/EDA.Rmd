@@ -1,0 +1,168 @@
+---
+title: "CDC Injury Code Mining - EDA"
+author: "dan a & scott a"
+date: "10/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+.libs <- c("ggplot2","data.table","devtools")
+devtools::install_github("rstudio/keras")
+lapply(.libs, require, character.only = TRUE)
+rm(.libs)
+knitr::opts_chunk$set(echo = TRUE)
+options(theme=theme_bw)
+```
+
+## Reading Data
+
+Training data are read from the website. There are 3 input / feature columns & one dependent / response column.
+Adding in label names for clarity. Although not strictly necessary for modeling, certainly it's helpful for sense-making.
+```{r read merge data, echo=TRUE}
+trn <- setDT(read.csv("https://www.dropbox.com/s/wqjr5zcx1tl2shq/train.csv?dl=1"))
+cd_map <- setDT(read.csv("https://wwwn.cdc.gov/Wisards/oiics/Doc/OIICS%20Code%20List%20v201.csv"))
+
+dat <- merge(trn, cd_map[CASE_CODE_TYPE=="Event" & Hierarchy_level==2, list(CASE_CODE, CASE_CODE_TITLE2=CASE_CODE_TITLE)], by.x = "event", by.y = "CASE_CODE", all.x=TRUE)
+dat[,event1:=as.integer(substr(event,1,1))]
+dat <- merge(dat, cd_map[CASE_CODE_TYPE=="Event" & Hierarchy_level==1, list(CASE_CODE, CASE_CODE_TITLE1=CASE_CODE_TITLE)], by.x = "event1", by.y = "CASE_CODE", all.x=TRUE)
+
+                         
+
+bound <- floor(round(nrow(dat) * .7 ))         #define % of training and test set
+dat2 <- dat[sample(nrow(dat)), ]           #sample rows 
+dat.train <- dat2[1:bound, ]              #get training set
+dat.test <- dat2[(bound+1):nrow(dat2), ]    #get test set
+dat.train$trn_tst <- "train"
+dat.test$trn_tst <- "test"
+
+dat <- rbind(dat.test, dat.train)
+dat[,sex:=ifelse(sex==2,"F","M")]
+
+
+write.csv(x = dat, file = "train_labeled_split.csv")
+write.csv(x = cd_map, file = "code_label_map.csv")
+rm(cd_map)
+rm(dat.train)
+rm(dat.test)
+rm(dat2)
+rm(bound)
+
+
+```
+
+### Response Variable distribution
+
+Many "Level 2" injury categories at are minimally populated &/or substantively redundant.
+```{r plot label count level 2, echo=FALSE}
+case_cnt <- dat[,.N,list(CASE_CODE_TITLE1, CASE_CODE_TITLE2, trn_tst)]
+
+write.csv(case_cnt, file="outcome counts.csv")
+dat <- within(dat, 
+                   CASE_CODE_TITLE2 <- factor(CASE_CODE_TITLE2, 
+                                      levels=names(sort(table(CASE_CODE_TITLE2), 
+                                                        decreasing=FALSE)))
+              )
+
+ggplot(data=dat, aes(x=CASE_CODE_TITLE2)) + geom_bar(stat="count") + geom_bar(aes(fill=trn_tst), position="dodge", stat="count")+
+  # theme(axis.text = element_text(size = 30)) + 
+  labs(x = "Count of records", y = "Injury Category") + 
+  coord_flip()
+```
+
+"Level 1" injury categories are at a higher level and have a more even distribution.
+
+```{r plot label count level 1, echo=FALSE}
+dat <- within(dat, 
+                   CASE_CODE_TITLE1 <- factor(CASE_CODE_TITLE1, 
+                                      levels=names(sort(table(CASE_CODE_TITLE1), 
+                                                        decreasing=FALSE)))
+              )
+ggplot(data=dat, aes(x=CASE_CODE_TITLE1)) + geom_bar(stat="count") + geom_bar(aes(fill=trn_tst), position="dodge", stat="count")+
+  # theme(axis.text = element_text(size = 20)) + 
+  labs(x = "Count of records", y = "Injury Category") + 
+  coord_flip()
+```
+
+
+### Non-text input variables
+Sex & Age are the only non-text input features
+
+#### Gender
+Dataset is 64.5% male
+
+```{r plot gender, echo=FALSE}
+ggplot(data=dat, aes(x=sex)) + geom_bar(stat="count") + geom_bar(aes(fill=trn_tst), position="dodge", stat="count")+
+  labs(x = "Gender", y = "Count of records")
+```
+
+#### Gender
+Age is largely younger distributed
+
+```{r plot age, echo=FALSE}
+ggplot(data=dat, aes(x=age)) + geom_density() + geom_density(aes(color=trn_tst))+
+  # theme(axis.text = element_text(size = 20)) + 
+  labs(x = "Age", y = "Record density")
+```
+
+#### Gender & Age
+Distributions are largely the same on age & gender, although females more quickly taper off in mid/late 30s to 50 than males 
+```{r plot gender & age, echo=FALSE}
+ggplot(data=dat) + 
+  geom_density(aes(x=age)) + geom_density(aes(x=age, color=sex))+labs(x = "Age", y = "Record density")
+  # geom_boxplot(aes(x=sex, y = age, fill=sex))+labs(x = "Gender", y = "Age")
+```
+
+### Response & input features
+
+#### Age distribution of outcomes
+No obvious breaks by age
+
+```{r age dist outcome, echo=FALSE}
+ggplot(data=dat, aes(x = CASE_CODE_TITLE1, y = age, color=sex)) + 
+  geom_boxplot(color="black") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+#### Gender distribution of outcomes
+Males have a sharp decline in incidents along major axes, while females are much more evenly distributed across categories.
+
+```{r gender dist outcome1, echo=FALSE}
+ggplot(data=dat, aes(x = CASE_CODE_TITLE1, fill=sex)) + 
+  geom_bar(stat="count", position="dodge") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +coord_flip()
+```
+
+```{r gender dist outcome2, echo=FALSE}
+ggplot(data=dat, aes(x = CASE_CODE_TITLE2, fill=sex)) + 
+  geom_bar(stat="count", position="dodge") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +coord_flip()
+```
+
+### Text analysis
+#### Text cleaning
+```{r unformatted word count, echo=TRUE}
+library(tidytext)
+library(dplyr)
+dat2 <- data.frame(dat)
+txt <- setDT(dat2 %>% unnest_tokens(word, text))
+txt2 <- txt[,.N,word]
+setorder(txt2, -N)
+write.csv(txt2, file = "word count all.csv", row.names = FALSE)
+rm(txt2)
+```
+
+```{r word count formatted, echo=TRUE}
+## remove stop words
+## basic cleanup
+# 1) remove AGE YOM
+# 2) remove basic stopwords
+# 3) misspellings
+all_stops <- c("yom", "ym", "y",stopwords("en"))
+dat2 <- data.frame(dat)
+txt <- setDT(dat2 %>% unnest_tokens(word, text))
+txt2 <- txt[,.N,word]
+setorder(txt2, -N)
+write.csv(txt2, file = "word_count_all.csv", row.names = FALSE)
+rm(txt2)
+```
+
