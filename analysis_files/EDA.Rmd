@@ -1,6 +1,6 @@
 ---
 title: "CDC Injury Code Mining - EDA"
-author: "dan a & scott a"
+author: "dan addyson"
 date: "10/19/2019"
 output: html_document
 ---
@@ -147,22 +147,36 @@ dat2 <- data.frame(dat)
 txt <- setDT(dat2 %>% unnest_tokens(word, text))
 txt2 <- txt[,.N,word]
 setorder(txt2, -N)
-write.csv(txt2, file = "word count all.csv", row.names = FALSE)
+write.csv(txt2, file = "word_count_all.csv", row.names = FALSE)
 rm(txt2)
 ```
 
+
+### Formatting text for clean-up
+The data are highly irregular, with misspellings & inconsistencies in how we would derive the diagnoses
+Formatting includes:
+1) taking care of stemming & misspellings
+2) 
 ```{r word count formatted, echo=TRUE}
 ## remove stop words
 ## basic cleanup
-# 1) remove AGE YOM
-# 2) remove basic stopwords
-# 3) misspellings
-all_stops <- c("yom", "ym", "y",stopwords("en"))
-dat2 <- data.frame(dat)
-txt <- setDT(dat2 %>% unnest_tokens(word, text))
-txt2 <- txt[,.N,word]
-setorder(txt2, -N)
-write.csv(txt2, file = "word_count_all.csv", row.names = FALSE)
+
+# 1) misspellings
+library(hunspell)
+bad <- hunspell(as.character(dat$text[153956]))
+hunspell_suggest(as.character(bad) )
+
+# 2) remove basic stopwords, YOM/F, ages
+txt2 <- gsub("^[0-9][0-9]", "", dat$text) # remove ages
+txt2 <- gsub("[0-9][0-9]yof | [0-9][0-9]yom", "", txt2)
+all_stops <- c("yom", "ym", "y", "yom", "yof", "yo m", "yo f", "y of", "y om", "y o f", "y o m","ym", "yf", stopwords("en")) # set stopwords
+txt2 <- removeWords(txt2, all_stops) # remove stopwords
+
+dx <- sapply(strsplit(x = txt2, split = "dx"), "[", 2)
+
+table(is.na(dx))
+
+write.csv(txt2, file = "word_count_fmt.csv", row.names = FALSE)
 rm(txt2)
 ```
 
