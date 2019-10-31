@@ -1,0 +1,67 @@
+# import stuff
+from spellchecker import SpellChecker
+# import pandas_profiling
+warnings.filterwarnings('ignore') 
+print(os.getcwd())
+print('imports successful')
+# import dataframes
+df_train = pd.read_csv(r'C:\Data\Python\cdc_text2\cdc_train_py.csv')
+df_valid = pd.read_csv(r'C:\Data\Python\cdc_text2\cdc_test_py.csv')
+
+spell = SpellChecker()
+
+# find those words that may be misspelled
+c = 0
+
+for i in df_train['text']:
+    misspelled = spell.unknown(i)
+
+    for word in misspelled:
+        # Get the one `most likely` answer
+        print(spell.correction(word))
+
+        # Get a list of `likely` options
+        print(spell.candidates(word))
+        c += 1
+
+e = 3
+print(df_train.iloc[e, 0])
+print(df_train.iloc[e, 0].split())
+misspelled = df_train.iloc[e, 0].split()
+try: 
+    misspelled.remove("D.X.")
+except: 
+    try:
+        misspelled.remove("DX")
+    except:
+        pass
+try: 
+    misspelled.remove("RT")
+except: 
+    try:
+        misspelled.remove("LT")
+    except:
+        pass
+try: 
+    misspelled.remove("YOM")
+except: 
+    try:
+        misspelled.remove("YOF")
+    except:
+        pass
+
+misspelled = spell.unknown(df_train.iloc[e, 0].split())
+fst_term = list(misspelled)[-1] 
+misspelled.remove(fst_term)
+print(misspelled)
+
+for word in misspelled:
+    # Get the one `most likely` answer
+    print(spell.correction(word))
+
+    # Get a list of `likely` options
+    print(spell.candidates(word))
+    c += 1
+    
+    
+   
